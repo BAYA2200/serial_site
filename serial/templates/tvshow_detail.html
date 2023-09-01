@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ tvshow.title }} Details</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'serial/css/styles.css' %}">
+</head>
+<body>
+    <header class="header">
+        <h1>{{ tvshow.title }} Details</h1>
+    </header>
+    <main class="main">
+        <div class="tv-show-media">
+            {% if tvshow.preview_image %}
+                <img src="{{ tvshow.preview_image.url }}" alt="{{ tvshow.title }} Preview">
+            {% endif %}
+        </div>
+        <div class="tv-show-info">
+            <h2>{{ tvshow.title }}</h2>
+            <p>{{ tvshow.description }}</p>
+            <p class="info-line">Release Date: {{ tvshow.release_date }}</p>
+            <p class="info-line">Seasons: {{ tvshow.num_seasons }}</p>
+            <p class="info-line">IMDb Rating: {{ tvshow.imdb_rating }}</p>
+            <p class="info-line">Genres:
+                {% for genre in tvshow.genres.all %}
+                    {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        </div>
+
+        <!-- Секция комментариев -->
+        <div class="tv-show-comments">
+            <h3>Comments:</h3>
+            <ul>
+                {% for comment in tvshow.comment_set.all %}
+                    <li>
+                        <p>{{ comment.text }}</p>
+                        <p>By {{ comment.user.username }} on {{ comment.created_at }}</p>
+                    </li>
+                {% empty %}
+                    <p>No comments yet.</p>
+                {% endfor %}
+            </ul>
+
+            <!-- Form for adding a comment (for authenticated users) -->
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'create_comment' tvshow.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="user" value="{{ user.id }}">
+                    <input type="hidden" name="tvshow" value="{{ tvshow.id }}">
+                    <textarea name="text" placeholder="Write a comment"></textarea>
+                    <button type="submit">Submit</button>
+                </form>
+            {% else %}
+                <p>You need to <a href="{% url 'login' %}">log in</a> to leave a comment.</p>
+            {% endif %}
+        </div>
+
+       <!-- Секция эпизодов -->
+<!-- Секция эпизодов -->
+<div class="tv-show-episodes">
+    <h3>Episodes:</h3>
+    <ul>
+        {% for episode in page %}
+            <li>
+<a href="{% url 'watch_episode_user' tvshow.id episode.episode_number %}">{{ episode.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page.number }} of {{ page.paginator.num_pages }}.
+            </span>
+
+            {% if page.has_next %}
+                <a href="?page={{ page.next_page_number }}">next</a>
+                <a href="?page={{ page.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+
+
+    </main>
+<!--    <script>-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            const episodeForm = document.querySelector('form');-->
+<!--            const selectedEpisodeTitle = document.querySelector('.selected-episode p');-->
+<!--            const selectedEpisodeVideo = document.querySelector('.selected-episode video');-->
+
+<!--            episodeForm.addEventListener('submit', function(event) {-->
+<!--                event.preventDefault();-->
+<!--                const selectedEpisodeOption = episodeForm.elements.episode.value;-->
+<!--                selectedEpisodeTitle.textContent = selectedEpisodeOption.textContent;-->
+<!--                selectedEpisodeVideo.src = selectedEpisodeOption.dataset.videoUrl;-->
+<!--                // Отправка POST-запроса на сервер-->
+<!--                fetch(episodeForm.action, {-->
+<!--                    method: 'POST',-->
+<!--                    body: new FormData(episodeForm),-->
+<!--                });-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if is_search %}Search Results{% else %}TV Shows{% endif %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'serial/css/styles.css' %}">
+</head>
+<body>
+    <header class="header">
+        <h1>{% if is_search %}Search Results{% else %}TV Shows{% endif %}</h1>
+    </header>
+    <main class="main">
+        <div class="search-form">
+            <form action="{% url 'tvshow_list' %}" method="get">
+                <input type="text" name="q" placeholder="Search TV Shows...">
+
+                <!-- Genre Checkboxes -->
+                <div>
+                    <label>Genres:</label>
+                    {% for genre in all_genres %}
+                        <label>
+                            <input type="checkbox" name="genre" value="{{ genre }}"> {{ genre }}
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <button type="submit">
+                    Search
+                </button>
+            </form>
+        </div>
+        <ul class="tv-show-list">
+            {% for tvshow in tvshows %}
+                <li class="tv-show">
+                    <a href="{% url 'tvshow_detail' tvshow.id %}">
+                        <div class="tv-show-media">
+                            {% if tvshow.preview_image %}
+                                <img src="{{ tvshow.preview_image.url }}" alt="{{ tvshow.title }} Preview">
+                            {% endif %}
+                        </div>
+                        <div class="tv-show-info">
+                            <h2>{{ tvshow.title }}</h2>
+                            <p>{{ tvshow.description }}</p>
+                            <p class="info-line">Release Date: {{ tvshow.release_date }}</p>
+                            <p class="info-line">Seasons: {{ tvshow.num_seasons }}</p>
+                            <p class="info-line">IMDb Rating: {{ tvshow.imdb_rating }}</p>
+                            <p class="info-line">Genres:
+                                {% for genre in tvshow.genres.all %}
+                                    {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        <!-- Logout Form -->
+        <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+    </main>
+</body>
+</html>
